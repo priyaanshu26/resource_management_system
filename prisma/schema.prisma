@@ -1,0 +1,147 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  EMPLOYEE
+  STUDENT
+}
+
+enum BookingStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum MaintenanceStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+model User {
+  id        Int      @id @default(autoincrement()) @map("user_id")
+  name      String   @db.VarChar(100)
+  email     String   @unique @db.VarChar(100)
+  role      Role     @default(EMPLOYEE)
+  password  String   @db.VarChar(255)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  bookings         Booking[] @relation("UserBookings")
+  approvedBookings Booking[] @relation("ApprovedBookings")
+
+  @@map("users")
+}
+
+model ResourceType {
+  id       Int    @id @default(autoincrement()) @map("resource_type_id")
+  typeName String @unique @db.VarChar(100) @map("type_name")
+
+  resources Resource[]
+
+  @@map("resource_types")
+}
+
+model Building {
+  id             Int    @id @default(autoincrement()) @map("building_id")
+  buildingName   String @db.VarChar(100) @map("building_name")
+  buildingNumber String @db.VarChar(50) @map("building_number")
+  totalFloors    Int    @map("total_floors")
+
+  resources Resource[]
+
+  @@map("buildings")
+}
+
+model Resource {
+  id             Int     @id @default(autoincrement()) @map("resource_id")
+  resourceName   String  @db.VarChar(100) @map("resource_name")
+  resourceTypeId Int     @map("resource_type_id")
+  buildingId     Int     @map("building_id")
+  floorNumber    Int     @map("floor_number")
+  description    String? @db.Text
+
+  resourceType ResourceType @relation(fields: [resourceTypeId], references: [id], onDelete: Cascade)
+  building     Building     @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+
+  facilities   Facility[]
+  maintenance  Maintenance[]
+  bookings     Booking[]
+  cupboards    Cupboard[]
+
+  @@map("resources")
+}
+
+model Facility {
+  id           Int     @id @default(autoincrement()) @map("facility_id")
+  resourceId   Int     @map("resource_id")
+  facilityName String  @db.VarChar(100) @map("facility_name")
+  details      String? @db.Text
+
+  resource Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+
+  @@map("facilities")
+}
+
+model Maintenance {
+  id              Int               @id @default(autoincrement()) @map("maintenance_id")
+  resourceId      Int               @map("resource_id")
+  maintenanceType String            @db.VarChar(100) @map("maintenance_type")
+  scheduledDate   DateTime          @db.Date @map("scheduled_date")
+  status          MaintenanceStatus @default(SCHEDULED)
+  notes           String?           @db.Text
+
+  resource Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+
+  @@map("maintenance")
+}
+
+model Booking {
+  id            Int           @id @default(autoincrement()) @map("booking_id")
+  resourceId    Int           @map("resource_id")
+  userId        Int           @map("user_id")
+  startDatetime DateTime      @map("start_datetime")
+  endDatetime   DateTime      @map("end_datetime")
+  status        BookingStatus @default(PENDING)
+  approverId    Int?          @map("approver_id")
+  purpose       String?       @db.Text
+  createdAt     DateTime      @default(now()) @map("created_at")
+
+  resource Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  user     User     @relation("UserBookings", fields: [userId], references: [id], onDelete: Cascade)
+  approver User?    @relation("ApprovedBookings", fields: [approverId], references: [id])
+
+  @@map("bookings")
+}
+
+model Cupboard {
+  id           Int    @id @default(autoincrement()) @map("cupboard_id")
+  resourceId   Int    @map("resource_id")
+  cupboardName String @db.VarChar(100) @map("cupboard_name")
+  totalShelves Int    @map("total_shelves")
+
+  resource Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  shelves  Shelf[]
+
+  @@map("cupboards")
+}
+
+model Shelf {
+  id          Int     @id @default(autoincrement()) @map("shelf_id")
+  cupboardId  Int     @map("cupboard_id")
+  shelfNumber Int     @map("shelf_number")
+  capacity    Int
+  description String? @db.Text
+
+  cupboard Cupboard @relation(fields: [cupboardId], references: [id], onDelete: Cascade)
+
+  @@map("shelves")
+}
