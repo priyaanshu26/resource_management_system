@@ -14,6 +14,12 @@ export default function DashboardPage() {
     const router = useRouter();
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [stats, setStats] = useState({
+        totalResources: 0,
+        totalBookings: 0,
+        pendingApprovals: 0,
+        totalUsers: 0
+    });
 
     useEffect(() => {
         // Get user from API
@@ -22,6 +28,21 @@ export default function DashboardPage() {
             .then((data) => {
                 if (data.user) {
                     setUser(data.user);
+                }
+            })
+            .catch((err) => console.error(err));
+
+        // Fetch dashboard stats
+        fetch('/api/dashboard/stats')
+            .then((res) => res.json())
+            .then((data) => {
+                if (data.stats) {
+                    setStats({
+                        totalResources: data.stats.totalResources || 0,
+                        totalBookings: data.stats.totalBookings || data.stats.myBookings || 0,
+                        pendingApprovals: data.stats.pendingApprovals || 0,
+                        totalUsers: data.stats.totalUsers || 0,
+                    });
                 }
             })
             .catch((err) => console.error(err))
@@ -157,6 +178,23 @@ export default function DashboardPage() {
                                 <p className="text-sm text-gray-500">View your reservations</p>
                             </div>
                         </a>
+
+                        {user?.role === 'ADMIN' && (
+                            <a
+                                href="/approvals"
+                                className="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg hover:border-primary-500 hover:bg-primary-50 transition-all group"
+                            >
+                                <div className="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center group-hover:bg-primary-600 transition-colors">
+                                    <svg className="w-5 h-5 text-primary-600 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p className="font-medium text-gray-900">Pending Approvals</p>
+                                    <p className="text-sm text-gray-500">Review booking requests</p>
+                                </div>
+                            </a>
+                        )}
 
                         {user?.role === 'ADMIN' && (
                             <a
