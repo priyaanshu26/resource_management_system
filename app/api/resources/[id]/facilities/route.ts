@@ -8,12 +8,13 @@ export async function GET(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id } = await params;
         const token = request.cookies.get('token')?.value;
         if (!token) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const resourceId = parseInt(params.id);
+        const resourceId = parseInt(id);
         const facilities = await prisma.facility.findMany({
             where: { resourceId },
             orderBy: { facilityName: 'asc' }
@@ -32,10 +33,11 @@ export async function POST(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id } = await params;
         const payload = await getAuthUser(request);
         if (!payload || payload.role !== 'ADMIN') { return NextResponse.json({ error: 'Unauthorized' }, { status: 401 }); }
 
-        const resourceId = parseInt(params.id);
+        const resourceId = parseInt(id);
         const body = await request.json();
         const { facilityName, details } = body;
 
