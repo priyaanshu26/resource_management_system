@@ -118,6 +118,17 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Resource is already booked for this time slot' }, { status: 400 });
         }
 
+        // Get resource details to check if approval is required
+        const resource = await prisma.resource.findUnique({
+            where: { id: parseInt(resourceId) }
+        });
+
+        if (!resource) {
+            return NextResponse.json({ error: 'Resource not found' }, { status: 404 });
+        }
+
+        const initialStatus = resource.requiresApproval ? 'PENDING' : 'APPROVED';
+
         const booking = await prisma.booking.create({
             data: {
                 resourceId: parseInt(resourceId),
@@ -125,12 +136,30 @@ export async function POST(request: NextRequest) {
                 startDatetime: start,
                 endDatetime: end,
                 purpose: purpose?.trim() || null,
-                status: 'PENDING'
+                status: initialStatus
             },
             include: {
                 resource: true
             }
         });
+
+        if (initialStatus === 'APPROVED') {
+            try {
+                await Promise.all([
+                    prisma.maintenance.create({
+                        data: {
+                            resourceId: booking.resourceId,
+                            maintenanceType: 'Routine Cleaning/Inspection',
+                            scheduledDate: booking.endDatetime,
+                            status: 'SCHEDULED',
+                            notes: `Automatic maintenance scheduled following auto-approved booking #${booking.id} by ${payload.email}.`
+                        }
+                    })
+                ]);
+            } catch (err) {
+                console.error('Failed side effects for auto-approval:', err);
+            }
+        }
 
         return NextResponse.json({ booking }, { status: 201 });
     } catch (error) {

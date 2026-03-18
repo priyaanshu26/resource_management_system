@@ -5,7 +5,7 @@ import { verifyToken } from '@/lib/auth';
 // POST /api/bookings/[id]/approve - Approve booking
 export async function POST(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const token = request.cookies.get('token')?.value;
@@ -13,12 +13,13 @@ export async function POST(
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const payload = verifyToken(token);
+        const payload = await verifyToken(token);
         if (!payload || payload.role !== 'ADMIN') {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
 
-        const id = parseInt(params.id);
+        const { id: idParam } = await params;
+        const id = parseInt(idParam);
         const booking = await prisma.booking.findUnique({
             where: { id },
             include: { resource: true }
@@ -44,12 +45,35 @@ export async function POST(
             }
         });
 
-        // TODO: Send notification to user
-        // TODO: Create maintenance alert if configured
+        // Automatically create a maintenance alert for the resource
+        // This keeps the resource in good condition for the next user
+        try {
+            await Promise.all([
+                prisma.maintenance.create({
+                    data: {
+                        resourceId: updated.resourceId,
+                        maintenanceType: 'Routine Cleaning/Inspection',
+                        scheduledDate: updated.endDatetime, // Schedule it for after the booking ends
+                        status: 'SCHEDULED',
+                        notes: `Automatic maintenance scheduled following booking #${updated.id} by ${updated.user.name}.`
+                    }
+                })
+            ]);
+        } catch (mErr) {
+            console.error('Failed to create automatic maintenance:', mErr);
+            // We don't fail the approval if side effects fail, but we log it
+        }
 
         return NextResponse.json({ booking: updated });
     } catch (error) {
         console.error('Error approving booking:', error);
-        return NextResponse.json({ error: 'Failed to approve booking' }, { status: 500 });
+        console.error('Error details:', {
+            message: error instanceof Error ? error.message : 'Unknown error',
+            stack: error instanceof Error ? error.stack : undefined
+        });
+        return NextResponse.json({
+            error: 'Failed to approve booking',
+            details: error instanceof Error ? error.message : 'Unknown error'
+        }, { status: 500 });
     }
 }

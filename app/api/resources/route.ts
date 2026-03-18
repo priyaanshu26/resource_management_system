@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const payload = verifyToken(token);
+        const payload = await verifyToken(token);
         if (!payload) {
             return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
         }
@@ -75,13 +75,13 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const payload = verifyToken(token);
+        const payload = await verifyToken(token);
         if (!payload || payload.role !== 'ADMIN') {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
 
         const body = await request.json();
-        const { resourceName, resourceTypeId, buildingId, floorNumber, description } = body;
+        const { resourceName, resourceTypeId, buildingId, floorNumber, description, requiresApproval } = body;
 
         if (!resourceName || !resourceTypeId || !buildingId || floorNumber === undefined) {
             return NextResponse.json(
@@ -115,7 +115,8 @@ export async function POST(request: NextRequest) {
                 resourceTypeId: parseInt(resourceTypeId),
                 buildingId: parseInt(buildingId),
                 floorNumber: parseInt(floorNumber),
-                description: description?.trim() || null
+                description: description?.trim() || null,
+                requiresApproval: requiresApproval === undefined ? true : Boolean(requiresApproval)
             },
             include: {
                 resourceType: true,

@@ -5,7 +5,7 @@ import { verifyToken } from '@/lib/auth';
 // PUT /api/facilities/[id] - Update facility
 export async function PUT(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const token = request.cookies.get('token')?.value;
@@ -13,12 +13,13 @@ export async function PUT(
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const payload = verifyToken(token);
+        const payload = await verifyToken(token);
         if (!payload || payload.role !== 'ADMIN') {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
 
-        const id = parseInt(params.id);
+        const { id: idParam } = await params;
+        const id = parseInt(idParam);
         const body = await request.json();
         const { facilityName, details } = body;
 
@@ -40,7 +41,7 @@ export async function PUT(
 // DELETE /api/facilities/[id] - Delete facility
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const token = request.cookies.get('token')?.value;
@@ -48,12 +49,13 @@ export async function DELETE(
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const payload = verifyToken(token);
+        const payload = await verifyToken(token);
         if (!payload || payload.role !== 'ADMIN') {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
 
-        const id = parseInt(params.id);
+        const { id: idParam } = await params;
+        const id = parseInt(idParam);
         await prisma.facility.delete({ where: { id } });
 
         return NextResponse.json({ message: 'Facility deleted successfully' });

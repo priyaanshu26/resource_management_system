@@ -35,6 +35,9 @@ export async function GET(request: NextRequest) {
             stats.totalUsers = await prisma.user.count();
             stats.totalBuildings = await prisma.building.count();
             stats.totalResourceTypes = await prisma.resourceType.count();
+            stats.activeMaintenance = await prisma.maintenance.count({
+                where: { status: { in: ['SCHEDULED', 'IN_PROGRESS'] } }
+            });
 
             // Upcoming bookings (next 7 days)
             const now = new Date();
@@ -64,6 +67,30 @@ export async function GET(request: NextRequest) {
                     }
                 }
             });
+
+            // Usage history (last 6 months)
+            const monthlyUsage = [];
+            for (let i = 5; i >= 0; i--) {
+                const date = new Date();
+                date.setMonth(date.getMonth() - i);
+                const monthStart = new Date(date.getFullYear(), date.getMonth(), 1);
+                const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+
+                const count = await prisma.booking.count({
+                    where: {
+                        createdAt: {
+                            gte: monthStart,
+                            lte: monthEnd
+                        }
+                    }
+                });
+
+                monthlyUsage.push({
+                    month: date.toLocaleString('default', { month: 'short' }),
+                    bookings: count
+                });
+            }
+            stats.usageHistory = monthlyUsage;
         } else {
             // User's upcoming bookings
             const now = new Date();

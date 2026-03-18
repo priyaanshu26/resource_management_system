@@ -5,7 +5,7 @@ import { verifyToken } from '@/lib/auth';
 // GET /api/resource-types/[id] - Get single resource type
 export async function GET(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const token = request.cookies.get('token')?.value;
@@ -13,12 +13,13 @@ export async function GET(
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const payload = verifyToken(token);
+        const payload = await verifyToken(token);
         if (!payload) {
             return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
         }
 
-        const id = parseInt(params.id);
+        const { id: idParam } = await params;
+        const id = parseInt(idParam);
         if (isNaN(id)) {
             return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
         }
@@ -57,7 +58,7 @@ export async function GET(
 // PUT /api/resource-types/[id] - Update resource type
 export async function PUT(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const token = request.cookies.get('token')?.value;
@@ -65,12 +66,13 @@ export async function PUT(
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const payload = verifyToken(token);
+        const payload = await verifyToken(token);
         if (!payload || payload.role !== 'ADMIN') {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
 
-        const id = parseInt(params.id);
+        const { id: idParam } = await params;
+        const id = parseInt(idParam);
         if (isNaN(id)) {
             return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
         }
@@ -120,7 +122,7 @@ export async function PUT(
 // DELETE /api/resource-types/[id] - Delete resource type
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const token = request.cookies.get('token')?.value;
@@ -128,12 +130,13 @@ export async function DELETE(
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const payload = verifyToken(token);
+        const payload = await verifyToken(token);
         if (!payload || payload.role !== 'ADMIN') {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
 
-        const id = parseInt(params.id);
+        const { id: idParam } = await params;
+        const id = parseInt(idParam);
         if (isNaN(id)) {
             return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
         }

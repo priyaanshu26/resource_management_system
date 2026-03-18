@@ -35,8 +35,8 @@ model User {
   password  String   @db.VarChar(255)
   createdAt DateTime @default(now()) @map("created_at")
 
-  bookings         Booking[] @relation("UserBookings")
-  approvedBookings Booking[] @relation("ApprovedBookings")
+  bookings         Booking[]      @relation("UserBookings")
+  approvedBookings Booking[]      @relation("ApprovedBookings")
 
   @@map("users")
 }
@@ -67,7 +67,8 @@ model Resource {
   resourceTypeId Int     @map("resource_type_id")
   buildingId     Int     @map("building_id")
   floorNumber    Int     @map("floor_number")
-  description    String? @db.Text
+  description      String? @db.Text
+  requiresApproval Boolean @default(true) @map("requires_approval")
 
   resourceType ResourceType @relation(fields: [resourceTypeId], references: [id], onDelete: Cascade)
   building     Building     @relation(fields: [buildingId], references: [id], onDelete: Cascade)
@@ -145,3 +146,5 @@ model Shelf {
 
   @@map("shelves")
 }
+
+

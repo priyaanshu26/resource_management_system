@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyToken } from '@/lib/auth';
 
-// PUT - Update cupboard
+// PUT /api/shelves/[id] - Update shelf
 export async function PUT(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
@@ -21,24 +21,24 @@ export async function PUT(
         const { id: idParam } = await params;
         const id = parseInt(idParam);
         const body = await request.json();
-        const { cupboardName, totalShelves } = body;
+        const { capacity, description } = body;
 
-        const cupboard = await prisma.cupboard.update({
+        const shelf = await prisma.shelf.update({
             where: { id },
             data: {
-                cupboardName: cupboardName.trim(),
-                totalShelves: parseInt(totalShelves)
+                capacity: capacity ? parseInt(capacity) : undefined,
+                description: description?.trim() || undefined
             }
         });
 
-        return NextResponse.json({ cupboard });
+        return NextResponse.json({ shelf });
     } catch (error) {
-        console.error('Error updating cupboard:', error);
-        return NextResponse.json({ error: 'Failed to update cupboard' }, { status: 500 });
+        console.error('Error updating shelf:', error);
+        return NextResponse.json({ error: 'Failed to update shelf' }, { status: 500 });
     }
 }
 
-// DELETE - Delete cupboard
+// DELETE /api/shelves/[id] - Delete shelf
 export async function DELETE(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
@@ -56,11 +56,14 @@ export async function DELETE(
 
         const { id: idParam } = await params;
         const id = parseInt(idParam);
-        await prisma.cupboard.delete({ where: { id } });
 
-        return NextResponse.json({ message: 'Cupboard deleted successfully' });
+        await prisma.shelf.delete({
+            where: { id }
+        });
+
+        return NextResponse.json({ message: 'Shelf deleted successfully' });
     } catch (error) {
-        console.error('Error deleting cupboard:', error);
-        return NextResponse.json({ error: 'Failed to delete cupboard' }, { status: 500 });
+        console.error('Error deleting shelf:', error);
+        return NextResponse.json({ error: 'Failed to delete shelf' }, { status: 500 });
     }
 }

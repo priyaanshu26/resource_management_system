@@ -5,7 +5,7 @@ import { verifyToken } from '@/lib/auth';
 // POST /api/bookings/[id]/reject - Reject booking
 export async function POST(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const token = request.cookies.get('token')?.value;
@@ -13,12 +13,13 @@ export async function POST(
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const payload = verifyToken(token);
+        const payload = await verifyToken(token);
         if (!payload || payload.role !== 'ADMIN') {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
 
-        const id = parseInt(params.id);
+        const { id: idParam } = await params;
+        const id = parseInt(idParam);
         const booking = await prisma.booking.findUnique({
             where: { id }
         });
@@ -43,11 +44,18 @@ export async function POST(
             }
         });
 
-        // TODO: Send notification to user
+
 
         return NextResponse.json({ booking: updated });
     } catch (error) {
         console.error('Error rejecting booking:', error);
-        return NextResponse.json({ error: 'Failed to reject booking' }, { status: 500 });
+        console.error('Error details:', {
+            message: error instanceof Error ? error.message : 'Unknown error',
+            stack: error instanceof Error ? error.stack : undefined
+        });
+        return NextResponse.json({
+            error: 'Failed to reject booking',
+            details: error instanceof Error ? error.message : 'Unknown error'
+        }, { status: 500 });
     }
 }

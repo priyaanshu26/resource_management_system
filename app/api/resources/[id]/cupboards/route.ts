@@ -5,7 +5,7 @@ import { verifyToken } from '@/lib/auth';
 // GET - List cupboards for a resource
 export async function GET(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const token = request.cookies.get('token')?.value;
@@ -13,7 +13,8 @@ export async function GET(
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const resourceId = parseInt(params.id);
+        const { id: idParam } = await params;
+        const resourceId = parseInt(idParam);
         const cupboards = await prisma.cupboard.findMany({
             where: { resourceId },
             include: { shelves: true }
@@ -29,7 +30,7 @@ export async function GET(
 // POST - Add cupboard to resource
 export async function POST(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const token = request.cookies.get('token')?.value;
@@ -37,12 +38,13 @@ export async function POST(
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const payload = verifyToken(token);
+        const payload = await verifyToken(token);
         if (!payload || payload.role !== 'ADMIN') {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
 
-        const resourceId = parseInt(params.id);
+        const { id: idParam } = await params;
+        const resourceId = parseInt(idParam);
         const body = await request.json();
         const { cupboardName, totalShelves } = body;
 
@@ -50,11 +52,23 @@ export async function POST(
             return NextResponse.json({ error: 'All fields required' }, { status: 400 });
         }
 
+        const totalShelvesInt = parseInt(totalShelves);
+        
         const cupboard = await prisma.cupboard.create({
             data: {
                 resourceId,
                 cupboardName: cupboardName.trim(),
-                totalShelves: parseInt(totalShelves)
+                totalShelves: totalShelvesInt,
+                shelves: {
+                    create: Array.from({ length: totalShelvesInt }).map((_, i) => ({
+                        shelfNumber: i + 1,
+                        capacity: 10, // Default capacity
+                        description: `Shelf ${i + 1} in ${cupboardName}`
+                    }))
+                }
+            },
+            include: {
+                shelves: true
             }
         });
 
