@@ -16,7 +16,7 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   return (
-    <AppBar position="sticky" elevation={0} sx={{ borderBottom: '1px solid #e0e0e0', backgroundColor: '#ffffff', color: '#333', top: 0, zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+    <AppBar position="sticky" elevation={0} sx={{ borderBottom: '1px solid #e0e0e0', backgroundColor: '#ffffff', color: '#333', top: 0 }}>
       <Toolbar sx={{ justifyContent: 'space-between' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
           {isMobile && (
