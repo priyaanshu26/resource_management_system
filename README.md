@@ -1,197 +1,92 @@
 # Resource Management System (RMS)
 
-A comprehensive web application for managing organizational resources including classrooms, labs, auditoriums, and facilities with booking, approval workflows, and maintenance tracking.
+A modern, professional enterprise-grade Resource Management System built for **Darshan University**. This system streamlines the management of organizational assets, facility bookings, and maintenance tracking through a secure, roles-based portal.
 
-## Features
+---
 
-- ✅ **JWT-based Authentication** with role-based access control (Admin, Employee, Student)
-- ✅ **Resource Management** - Manage different types of resources organized by buildings and floors
-- 📋 **Booking System** - Request and manage resource bookings with approval workflows
-- 🔧 **Maintenance Tracking** - Schedule and track maintenance activities
-- 📊 **Dashboard & Reports** - View usage statistics and generate reports
-- 🗄️ **Storage Management** - Track cupboards and shelves within resources
+## 🎨 Professional Identity
+- 🛡️ **Official Branding**: Features a custom-designed geometric logo and a premium Glassmorphism-inspired UI.
+- 🔐 **Secure Portal**: Redesigned login experience with high-end aesthetic and radial gradient backgrounds.
 
-## Tech Stack
+## ✨ Core Features
+- ✅ **Secure Authentication**: JWT-based session management with role-based access control (ADMIN, EMPLOYEE, STUDENT).
+- 🏢 **Operations Hub**: Centralized management for Buildings, Resource Types, and organizational assets.
+- 🔧 **Advanced Maintenance Oversight**:
+  - Linear status workflow: `SCHEDULED` → `IN_PROGRESS` → `COMPLETED`/`CANCELLED`.
+  - **Terminal Locking**: Completed or cancelled repairs are locked to prevent accidental reversals.
+  - Role-based visibility for technicians (Employees) and oversight for Administrators.
+- 📅 **Intelligent Booking**:
+  - Track requests with clear "Created By" user attribution.
+  - Transparent approval/rejection workflows for administrative staff.
+- 🕒 **Standardized Formatting**: Unified **DD/MM/YYYY** date and 24-hour time representation across the entire system.
+- 📊 **Dynamic Dashboard**: Real-time statistics and usage trends for organizational resources.
 
-- **Frontend:** Next.js 14+ (App Router), TypeScript, Tailwind CSS
-- **Backend:** Next.js API Routes
-- **Database:** PostgreSQL with Prisma ORM
-- **Authentication:** JWT (jsonwebtoken) with bcrypt for password hashing
+## 🛠️ Tech Stack
+- **Frontend**: Next.js 14+ (App Router), TypeScript, Material UI (MUI).
+- **Backend**: Next.js API Routes (Serverless).
+- **ORM & Database**: Prisma with PostgreSQL.
+- **Security**: BCryptJS for hashing, JWT (jose) for stateless tokens.
+- **Utilities**: `date-fns` for global date consistency, `react-hook-form` + `zod` for robust validation.
 
-## Prerequisites
+---
 
-- Node.js 18+ and npm/yarn
-- PostgreSQL database (local or hosted)
+## 🚀 Quick Start
 
-## Installation
+### 1. Prerequisites
+- Node.js 18.0+
+- PostgreSQL Instance
 
-### 1. Clone and Install Dependencies
-
-```bash
-cd rms
-npm install
-```
-
-### 2. Configure Environment Variables
-
-Create a `.env` file in the root directory (use `.env.example` as reference):
-
+### 2. Environment Setup
+Create a `.env` file in the root directory:
 ```env
-# Database - Update with your PostgreSQL credentials
-DATABASE_URL="postgresql://username:password@localhost:5432/rms_db?schema=public"
-
-# JWT Authentication - CHANGE IN PRODUCTION
-JWT_SECRET="your-super-secret-jwt-key-change-this-in-production-minimum-32-characters"
+DATABASE_URL="postgresql://user:password@ep-morning-resonance-a1wesdx4-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require"
+JWT_SECRET="generate_a_strong_64_character_secret_here"
 JWT_EXPIRES_IN="7d"
-
-# Default Admin Credentials - CHANGE AFTER FIRST LOGIN
-DEFAULT_ADMIN_EMAIL="admin@rms.com"
-DEFAULT_ADMIN_PASSWORD="Admin@123"
 ```
 
-**Important:** 
-- Replace `username`, `password`, and `rms_db` with your PostgreSQL credentials
-- Generate a strong random string for `JWT_SECRET` in production
-- Change the default admin password after first login
-
-### 3. Set Up the Database
-
+### 3. Installation & Database Sync
 ```bash
-# Generate Prisma Client
+npm install
 npm run db:generate
-
-# Push the schema to your database (creates tables)
 npm run db:push
-
-# Seed the database with initial data
 npm run db:seed
 ```
 
-### 4. Run the Development Server
-
+### 4. Launch Development
 ```bash
 npm run dev
 ```
+Portal: [http://localhost:3000](http://localhost:3000)
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+---
 
-## Default Credentials
+## 👥 Default Accounts (Seeded)
+| Role | Email | Password |
+| :--- | :--- | :--- |
+| **Admin** | `admin@rms.com` | `Admin@123` |
+| **Employee** | `employee@rms.com` | `Employee@123` |
+| **Student** | `student@rms.com` | `Student@123` |
 
-After running the seed script, you can log in with these accounts:
+---
 
-- **Admin:**
-  - Email: `admin@rms.com`
-  - Password: `Admin@123`
+## 📂 Project Structure
+- **/app**: Next.js App Router (UI & API endpoints).
+- **/components**: Reusable UI parts (Sidebar, Navbar, etc.).
+- **/lib**: Core utilities (`formatters.ts`, `AuthContext.tsx`, Prisma Client).
+- **/prisma**: Database schema definition and seed data.
+- **/public**: Static assets including the official **logo.png**.
 
-- **Employee:**
-  - Email: `employee@rms.com`
-  - Password: `Employee@123`
+---
 
-- **Student:**
-  - Email: `student@rms.com`
-  - Password: `Student@123`
+## 🔜 Future Roadmap
+1. 📄 **PDF Reporting**: Direct export of booking and maintenance logs.
+2. 🔔 **Notifications**: Real-time alerts for booking approvals.
+3. 🗺️ **Floor Mapping**: Interactive visual floor plans for buildings.
+4. 📱 **Mobile App**: Dedicated Flutter-based client for field technicians.
 
-## Project Structure
+---
 
-```
-rms/
-├── app/                      # Next.js app directory
-│   ├── api/                  # API routes
-│   │   └── auth/            # Authentication endpoints
-│   ├── login/               # Login page
-│   ├── register/            # Registration page
-│   ├── dashboard/           # Dashboard page
-│   ├── admin/               # Admin panel (to be implemented)
-│   └── bookings/            # Booking pages (to be implemented)
-├── lib/                     # Utility functions
-│   ├── auth.ts             # JWT authentication utilities
-│   └── prisma.ts           # Prisma client instance
-├── prisma/
-│   ├── schema.prisma       # Database schema
-│   └── seed.ts             # Database seeding script
-└── middleware.ts           # Route protection middleware
-```
+## 📖 Related Documents
+- [Deployment Guide](./DEPLOYMENT.md) - Production deployment instructions.
 
-## Database Schema
-
-The system includes the following main models:
-
-- **User** - System users (Admin, Employee, Student)
-- **ResourceType** - Categories of resources (Classroom, Lab, etc.)
-- **Building** - Physical buildings housing resources
-- **Resource** - Individual resources that can be booked
-- **Facility** - Amenities available with resources
-- **Booking** - Resource reservation requests
-- **Maintenance** - Maintenance schedules and records
-- **Cupboard** & **Shelf** - Storage organization within resources
-
-## Available Scripts
-
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run start` - Start production server
-- `npm run lint` - Run ESLint
-- `npm run db:generate` - Generate Prisma Client
-- `npm run db:push` - Push schema changes to database
-- `npm run db:seed` - Seed database with initial data
-- `npm run db:studio` - Open Prisma Studio (database GUI)
-
-## API Endpoints
-
-### Authentication
-- `POST /api/auth/login` - User login
-- `POST /api/auth/register` - User registration
-- `GET /api/auth/me` - Get current user
-- `POST /api/auth/logout` - User logout
-
-### Admin Panel (To be implemented)
-- Resource Types CRUD
-- Buildings CRUD
-- Resources CRUD
-- Users Management
-- Maintenance Management
-
-### Bookings (To be implemented)
-- Create booking
-- View bookings
-- Approve/reject bookings
-
-## Next Steps
-
-The following features are planned for implementation:
-
-1. **Admin Panel** - Complete CRUD operations for all resources
-2. **Booking System** - Full booking workflow with availability checking
-3. **Maintenance Module** - Schedule and track maintenance
-4. **Reports** - Generate usage and analysis reports
-5. **Dashboard Enhancements** - Real-time statistics and charts
-
-## Development Notes
-
-- The application uses JWT tokens stored in HTTP-only cookies for security
-- Middleware protects routes based on authentication and user roles
-- All passwords are hashed using bcrypt before storage
-- Prisma handles all database operations with type safety
-
-## Troubleshooting
-
-### Database Connection Issues
-- Ensure PostgreSQL is running
-- Verify DATABASE_URL in .env is correct
-- Check that the database exists
-
-### Prisma Issues
-```bash
-# Reset and regenerate
-npm run db:generate
-npm run db:push
-```
-
-### Authentication Issues
-- Clear browser cookies and localStorage
-- Check JWT_SECRET is set in .env
-- Verify token expiration settings
-
-## License
-
-This project is for educational/organizational use.
+Developed with ❤️ for **Darshan University**.
