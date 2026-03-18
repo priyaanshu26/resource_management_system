@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { verifyToken } from '@/lib/auth';
+import { verifyToken, getAuthUser } from '@/lib/auth';
 
 // GET /api/resources/[id] - Get resource with all details
 export async function GET(
@@ -8,12 +8,7 @@ export async function GET(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const token = request.cookies.get('token')?.value;
-        if (!token) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
-
-        const payload = await verifyToken(token);
+        const payload = await getAuthUser(request);
         if (!payload) {
             return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
         }
@@ -71,15 +66,8 @@ export async function PUT(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const token = request.cookies.get('token')?.value;
-        if (!token) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
-
-        const payload = await verifyToken(token);
-        if (!payload || payload.role !== 'ADMIN') {
-            return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-        }
+        const payload = await getAuthUser(request);
+        if (!payload || payload.role !== 'ADMIN') { return NextResponse.json({ error: 'Unauthorized' }, { status: 401 }); }
 
         const { id: idParam } = await params;
         const id = parseInt(idParam);
@@ -147,15 +135,8 @@ export async function DELETE(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const token = request.cookies.get('token')?.value;
-        if (!token) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
-
-        const payload = await verifyToken(token);
-        if (!payload || payload.role !== 'ADMIN') {
-            return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-        }
+        const payload = await getAuthUser(request);
+        if (!payload || payload.role !== 'ADMIN') { return NextResponse.json({ error: 'Unauthorized' }, { status: 401 }); }
 
         const { id: idParam } = await params;
         const id = parseInt(idParam);

@@ -6,7 +6,7 @@ import { verifyToken } from './lib/auth';
 const publicRoutes = ['/login', '/register'];
 const adminRoutes = ['/admin'];
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
     // Allow public routes
@@ -23,19 +23,28 @@ export function middleware(request: NextRequest) {
         return NextResponse.next();
     }
 
-    // Get token from cookie
-    const token = request.cookies.get('token')?.value;
+    // Get token from cookie or Authorization header
+    let token = request.cookies.get('token')?.value;
+
+    const authHeader = request.headers.get('Authorization');
+    if (!token && authHeader?.startsWith('Bearer ')) {
+        token = authHeader.substring(7);
+    }
 
     // Redirect to login if no token
     if (!token) {
+        // Only redirect page requests, not API or static assets
+        if (pathname === '/login' || pathname === '/register') {
+            return NextResponse.next();
+        }
         const url = request.nextUrl.clone();
         url.pathname = '/login';
         url.searchParams.set('from', pathname);
         return NextResponse.redirect(url);
     }
 
-    // Verify token
-    const payload = verifyToken(token);
+    // Verify token (async)
+    const payload = await verifyToken(token);
     if (!payload) {
         const url = request.nextUrl.clone();
         url.pathname = '/login';

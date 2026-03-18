@@ -1,3 +1,4 @@
+import { NextRequest } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
@@ -69,12 +70,27 @@ export async function verifyToken(token: string): Promise<JWTPayload | null> {
 }
 
 /**
- * Get the current user from the token in cookies
+ * Get the current user from the token in cookies or Authorization header
  */
 export async function getCurrentUser() {
     try {
+        let token: string | undefined;
+
+        // Try to get token from cookies
         const cookieStore = await cookies();
-        const token = cookieStore.get('token')?.value;
+        token = cookieStore.get('token')?.value;
+
+        // If no token in cookies, try Authorization header (for client-side fetches with Bearer token)
+        if (!token) {
+            // Note: cookies() doesn't have headers. For headers, we need another way.
+            // In Next.js 13+ app directory, we can use headers() from next/headers
+            const { headers } = await import('next/headers');
+            const headerStore = await headers();
+            const authHeader = headerStore.get('Authorization');
+            if (authHeader?.startsWith('Bearer ')) {
+                token = authHeader.substring(7);
+            }
+        }
 
         if (!token) {
             return null;
@@ -85,7 +101,7 @@ export async function getCurrentUser() {
             return null;
         }
 
-        // Fetch full user  data from database
+        // Fetch full user data from database
         const user = await prisma.user.findUnique({
             where: { id: payload.userId },
             select: {
@@ -115,3 +131,28 @@ export async function getUserFromAuthHeader(authHeader: string | null): Promise<
     const token = authHeader.substring(7);
     return await verifyToken(token);
 }
+
+/**
+ * Common helper to get user from request (checks both cookies and headers)
+ */
+export async function getAuthUser(request: NextRequest | Request) {
+    // Try cookie first (Standard Next.js)
+    if ('cookies' in request && typeof (request as any).cookies?.get === 'function') {
+        const token = (request as any).cookies.get('token')?.value;
+        if (token) {
+            const payload = await verifyToken(token);
+            if (payload) return payload;
+        }
+    }
+
+    // Try Authorization header
+    const authHeader = request.headers.get('Authorization');
+    if (authHeader?.startsWith('Bearer ')) {
+        const token = authHeader.substring(7);
+        const payload = await verifyToken(token);
+        if (payload) return payload;
+    }
+
+    return null;
+}
+

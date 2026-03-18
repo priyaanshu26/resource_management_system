@@ -1,18 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { verifyToken } from '@/lib/auth';
+import { verifyToken, getAuthUser } from '@/lib/auth';
 
 // GET /api/resources - List all resources with filters
 export async function GET(request: NextRequest) {
     try {
-        const token = request.cookies.get('token')?.value;
-        if (!token) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
-
-        const payload = await verifyToken(token);
+        const payload = await getAuthUser(request);
         if (!payload) {
-            return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
         const { searchParams } = new URL(request.url);
@@ -70,14 +65,9 @@ export async function GET(request: NextRequest) {
 // POST /api/resources - Create new resource
 export async function POST(request: NextRequest) {
     try {
-        const token = request.cookies.get('token')?.value;
-        if (!token) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
-
-        const payload = await verifyToken(token);
+        const payload = await getAuthUser(request);
         if (!payload || payload.role !== 'ADMIN') {
-            return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
         const body = await request.json();

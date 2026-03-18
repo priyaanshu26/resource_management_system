@@ -1,16 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { verifyToken } from '@/lib/auth';
+import { verifyToken, getAuthUser } from '@/lib/auth';
 
 // GET /api/resource-types - List all resource types
 export async function GET(request: NextRequest) {
     try {
-        const token = request.cookies.get('token')?.value;
-        if (!token) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
-
-        const payload = await verifyToken(token);
+        const payload = await getAuthUser(request);
         if (!payload) {
             return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
         }
@@ -37,15 +32,8 @@ export async function GET(request: NextRequest) {
 // POST /api/resource-types - Create new resource type
 export async function POST(request: NextRequest) {
     try {
-        const token = request.cookies.get('token')?.value;
-        if (!token) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
-
-        const payload = await verifyToken(token);
-        if (!payload || payload.role !== 'ADMIN') {
-            return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-        }
+        const payload = await getAuthUser(request);
+        if (!payload || payload.role !== 'ADMIN') { return NextResponse.json({ error: 'Unauthorized' }, { status: 401 }); }
 
         const body = await request.json();
         const { typeName } = body;

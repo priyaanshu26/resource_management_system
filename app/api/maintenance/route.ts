@@ -1,19 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { verifyToken } from '@/lib/auth';
+import { verifyToken, getAuthUser } from '@/lib/auth';
 
 // GET /api/maintenance - List all maintenance schedules
 export async function GET(request: NextRequest) {
     try {
-        const token = request.cookies.get('token')?.value;
-        if (!token) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
-
-        const payload = await verifyToken(token);
-        if (!payload || payload.role !== 'ADMIN') {
-            return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-        }
+        const payload = await getAuthUser(request);
+        if (!payload || payload.role !== 'ADMIN') { return NextResponse.json({ error: 'Unauthorized' }, { status: 401 }); }
 
         const { searchParams } = new URL(request.url);
         const status = searchParams.get('status');
@@ -46,15 +39,8 @@ export async function GET(request: NextRequest) {
 // POST /api/maintenance - Create maintenance schedule
 export async function POST(request: NextRequest) {
     try {
-        const token = request.cookies.get('token')?.value;
-        if (!token) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
-
-        const payload = await verifyToken(token);
-        if (!payload || payload.role !== 'ADMIN') {
-            return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-        }
+        const payload = await getAuthUser(request);
+        if (!payload || payload.role !== 'ADMIN') { return NextResponse.json({ error: 'Unauthorized' }, { status: 401 }); }
 
         const body = await request.json();
         const { resourceId, maintenanceType, scheduledDate, notes } = body;
