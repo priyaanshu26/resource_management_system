@@ -58,6 +58,7 @@ export default function UsersPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<UserForm>({
@@ -92,24 +93,69 @@ export default function UsersPage() {
     }
   };
 
-  const onSubmit = async (data: UserForm) => {
+  const handleEditOpen = (user: User) => {
+    setEditingUser(user);
+    reset({
+      name: user.name,
+      email: user.email,
+      role: user.role as any,
+      password: '' // Keep empty for no change
+    });
+    setOpen(true);
+  };
+
+  const handleDelete = async (id: number) => {
+    if (id === currentUser?.id) {
+       alert('You cannot delete your own account.');
+       return;
+    }
+    if (!confirm('Are you sure you want to remove this user? This action cannot be undone.')) return;
+    
+    try {
+      const response = await fetch(`/api/users/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!response.ok) {
+        const result = await response.json();
+        throw new Error(result.error || 'Failed to delete');
+      }
+      await fetchUsers();
+    } catch (err: any) {
+      alert(err.message || 'Deletion failed.');
+    }
+  };
+
+  const onSubmit = async (data: any) => {
     setIsSubmitting(true);
     try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
+      const url = editingUser ? `/api/users/${editingUser.id}` : '/api/auth/register';
+      const method = editingUser ? 'PUT' : 'POST';
+      
+      const payload = { ...data };
+      if (editingUser && !payload.password) {
+        delete payload.password; // Don't send empty password if editing
+      }
+
+      const response = await fetch(url, {
+        method: method,
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(payload),
       });
-      if (!response.ok) throw new Error('Failed to add user');
+
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Failed to process request');
+      
       await fetchUsers();
       setOpen(false);
+      setEditingUser(null);
       reset();
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert('Failed to add user.');
+      alert(err.message || 'Operation failed.');
     } finally {
       setIsSubmitting(false);
     }
@@ -189,22 +235,22 @@ export default function UsersPage() {
                 </TableCell>
                 <TableCell>#{user.id}</TableCell>
                 <TableCell>{new Date(user.createdAt).toLocaleDateString()}</TableCell>
-                <TableCell align="right">
-                   <Tooltip title="Edit User">
-                     <IconButton size="small"><EditIcon fontSize="small" /></IconButton>
-                   </Tooltip>
-                   <Tooltip title="Delete User">
-                     <IconButton size="small" color="error"><DeleteIcon fontSize="small" /></IconButton>
-                   </Tooltip>
-                </TableCell>
+                 <TableCell align="right">
+                    <Tooltip title="Edit User">
+                      <IconButton size="small" onClick={() => handleEditOpen(user)}><EditIcon fontSize="small" /></IconButton>
+                    </Tooltip>
+                    <Tooltip title="Delete User">
+                      <IconButton size="small" color="error" onClick={() => handleDelete(user.id)}><DeleteIcon fontSize="small" /></IconButton>
+                    </Tooltip>
+                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </TableContainer>
 
-      <Dialog open={open} onClose={() => setOpen(false)} maxWidth="xs" fullWidth>
-        <DialogTitle sx={{ fontWeight: 700 }}>Add New User Account</DialogTitle>
+       <Dialog open={open} onClose={() => { setOpen(false); setEditingUser(null); }} maxWidth="xs" fullWidth>
+         <DialogTitle sx={{ fontWeight: 700 }}>{editingUser ? 'Update User Account' : 'Add New User Account'}</DialogTitle>
         <DialogContent>
           <Box component="form" sx={{ mt: 1 }}>
             <TextField
@@ -223,15 +269,15 @@ export default function UsersPage() {
               error={!!errors.email}
               helperText={errors.email?.message}
             />
-            <TextField
-              margin="normal"
-              fullWidth
-              label="Password"
-              type="password"
-              {...register('password')}
-              error={!!errors.password}
-              helperText={errors.password?.message}
-            />
+             <TextField
+               margin="normal"
+               fullWidth
+               label={editingUser ? "Password (leave blank for no change)" : "Password"}
+               type="password"
+               {...register('password', { required: !editingUser })}
+               error={!!errors.password}
+               helperText={errors.password?.message}
+             />
             <TextField
               select
               margin="normal"
@@ -255,7 +301,7 @@ export default function UsersPage() {
             onClick={handleSubmit(onSubmit)}
             disabled={isSubmitting}
           >
-            {isSubmitting ? <CircularProgress size={24} color="inherit" /> : 'Create User'}
+             {isSubmitting ? <CircularProgress size={24} color="inherit" /> : (editingUser ? 'Update User' : 'Create User')}
           </Button>
         </DialogActions>
       </Dialog>

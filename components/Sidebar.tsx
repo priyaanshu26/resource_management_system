@@ -12,6 +12,7 @@ import {
   Typography, 
   Divider 
 } from '@mui/material';
+import { useAuth } from '@/lib/AuthContext';
 import { usePathname, useRouter } from 'next/navigation';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import BookingsIcon from '@mui/icons-material/EventNote';
@@ -24,20 +25,22 @@ import FacilityIcon from '@mui/icons-material/HomeRepairService';
 
 const drawerWidth = 240;
 
-const menuItems = [
-  { text: 'Overview', icon: <DashboardIcon />, path: '/dashboard' },
-  { text: 'Resources', icon: <ResourceIcon />, path: '/dashboard/resources' },
-  { text: 'Bookings', icon: <BookingsIcon />, path: '/dashboard/bookings' },
-  { text: 'Buildings', icon: <BuildingsIcon />, path: '/dashboard/buildings' },
-  { text: 'Facilities', icon: <FacilityIcon />, path: '/dashboard/facilities' },
-  { text: 'Maintenance', icon: <MaintenanceIcon />, path: '/dashboard/maintenance' },
-  { text: 'Users', icon: <UserIcon />, path: '/dashboard/users' },
-  { text: 'Reports', icon: <ReportsIcon />, path: '/dashboard/reports' },
-];
-
 export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const { user } = useAuth();
+
+  const role = user?.role || 'STUDENT';
+
+  const menuItems = [
+    { text: 'Overview', icon: <DashboardIcon />, path: '/dashboard' },
+    { text: 'Resources', icon: <ResourceIcon />, path: '/dashboard/resources' },
+    { text: 'Bookings', icon: <BookingsIcon />, path: '/dashboard/bookings' },
+    { text: 'Buildings', icon: <BuildingsIcon />, path: '/dashboard/buildings' },
+    { text: 'Facilities', icon: <FacilityIcon />, path: '/dashboard/facilities' },
+    ...(role !== 'STUDENT' ? [{ text: 'Maintenance', icon: <MaintenanceIcon />, path: '/dashboard/maintenance' }] : []),
+    ...(role === 'ADMIN' ? [{ text: 'Users', icon: <UserIcon />, path: '/dashboard/users' }] : []),
+  ];
 
   return (
     <Drawer

@@ -9,7 +9,9 @@ export async function PUT(
 ) {
     try {
         const payload = await getAuthUser(request);
-        if (!payload || payload.role !== 'ADMIN') { return NextResponse.json({ error: 'Unauthorized' }, { status: 401 }); }
+        if (!payload || !['ADMIN', 'EMPLOYEE'].includes(payload.role)) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
 
         const { id: idParam } = await params;
         const id = parseInt(idParam);

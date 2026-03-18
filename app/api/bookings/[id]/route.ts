@@ -73,19 +73,32 @@ export async function PUT(
             return NextResponse.json({ error: 'Booking not found' }, { status: 404 });
         }
 
-        // Only owner can cancel their booking
-        if (booking.userId !== payload.userId && payload.role !== 'ADMIN') {
-            return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-        }
+        // Admins can APPROVE or REJECT
+        // Owners or Admins can CANCEL
+        let newStatus = booking.status;
+        let updateData: any = {};
 
-        // Can only cancel PENDING or APPROVED bookings
-        if (!['PENDING', 'APPROVED'].includes(booking.status)) {
-            return NextResponse.json({ error: 'Can only cancel pending or approved bookings' }, { status: 400 });
+        if (status === 'CANCELLED') {
+           if (booking.userId !== payload.userId && payload.role !== 'ADMIN') {
+              return NextResponse.json({ error: 'Unauthorized to cancel' }, { status: 403 });
+           }
+           newStatus = 'CANCELLED';
+        } else if (['APPROVED', 'REJECTED'].includes(status)) {
+           if (payload.role !== 'ADMIN') {
+              return NextResponse.json({ error: 'Only admins can approve or reject' }, { status: 403 });
+           }
+           newStatus = status;
+           updateData.approverId = payload.userId;
+        } else {
+           return NextResponse.json({ error: 'Invalid status update' }, { status: 400 });
         }
 
         const updated = await prisma.booking.update({
             where: { id },
-            data: { status: status === 'CANCELLED' ? 'CANCELLED' : booking.status }
+            data: { 
+                status: newStatus,
+                ...updateData
+            }
         });
 
         return NextResponse.json({ booking: updated });

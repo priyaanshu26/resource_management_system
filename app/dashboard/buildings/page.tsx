@@ -11,19 +11,21 @@ import {
   Divider, 
   CircularProgress, 
   Alert,
-  Chip,
+  Avatar,
   Paper,
   Button,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
-  TextField
+  TextField,
+  IconButton
 } from '@mui/material';
 import { useAuth } from '@/lib/AuthContext';
-import Navbar from '@/components/Navbar';
 import BuildingIcon from '@mui/icons-material/Business';
 import AddIcon from '@mui/icons-material/Add';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -39,7 +41,7 @@ interface Building {
 const buildingSchema = z.object({
   buildingName: z.string().min(2, 'Name is required'),
   buildingNumber: z.string().min(1, 'Number is required'),
-  totalFloors: z.string().transform(Number).pipe(z.number().min(1, 'Must be at least 1')),
+  totalFloors: z.string().min(1, 'Total floors is required')
 });
 
 type BuildingForm = z.infer<typeof buildingSchema>;
@@ -50,12 +52,18 @@ export default function BuildingsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
+  const [editingBuilding, setEditingBuilding] = useState<Building | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isAdmin = user?.role === 'ADMIN';
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<BuildingForm>({
     resolver: zodResolver(buildingSchema),
+    defaultValues: {
+      buildingName: '',
+      buildingNumber: '',
+      totalFloors: ''
+    }
   });
 
   useEffect(() => {
@@ -81,24 +89,57 @@ export default function BuildingsPage() {
     }
   };
 
+  const handleEditOpen = (building: Building) => {
+    setEditingBuilding(building);
+    reset({
+      buildingName: building.buildingName,
+      buildingNumber: building.buildingNumber,
+      totalFloors: building.totalFloors.toString()
+    });
+    setOpen(true);
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!confirm('Are you sure you want to delete this building? This may fail if resources are attached.')) return;
+    try {
+      const response = await fetch(`/api/buildings/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Failed to delete building');
+      await fetchBuildings();
+    } catch (err: any) {
+      alert(err.message || 'Deletion failed.');
+    }
+  };
+
   const onSubmit = async (data: BuildingForm) => {
     setIsSubmitting(true);
     try {
-      const response = await fetch('/api/buildings', {
-        method: 'POST',
+      const url = editingBuilding ? `/api/buildings/${editingBuilding.id}` : '/api/buildings';
+      const method = editingBuilding ? 'PUT' : 'POST';
+
+      const response = await fetch(url, {
+        method: method,
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+           ...data,
+           totalFloors: parseInt(data.totalFloors)
+        }),
       });
-      if (!response.ok) throw new Error('Failed to create building');
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Failed to save building');
       await fetchBuildings();
       setOpen(false);
+      setEditingBuilding(null);
       reset();
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert('Failed to add building.');
+      alert(err.message || 'Failed to save building.');
     } finally {
       setIsSubmitting(false);
     }
@@ -133,29 +174,35 @@ export default function BuildingsPage() {
 
       <Grid container spacing={3}>
         {buildings.map((building) => (
-          <Grid item xs={12} sm={6} md={4} key={building.id}>
+          <Grid key={building.id} size={{ xs: 12, sm: 6, md: 4 }}>
             <Card sx={{ height: '100%', borderRadius: 3 }}>
               <CardContent sx={{ pb: 1 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
                   <Avatar sx={{ bgcolor: 'primary.main', borderRadius: 2 }}>
                     <BuildingIcon />
                   </Avatar>
-                  <Box>
+                   <Box>
                     <Typography variant="h6" fontWeight="600">
                       {building.buildingName}
                     </Typography>
                     <Typography variant="caption" color="textSecondary">
                       Bldg #{building.buildingNumber}
                     </Typography>
-                  </Box>
-                </Box>
+                   </Box>
+                   {isAdmin && (
+                     <Box sx={{ ml: 'auto', display: 'flex', gap: 0.5 }}>
+                        <IconButton size="small" onClick={() => handleEditOpen(building)}><EditIcon fontSize="small" /></IconButton>
+                        <IconButton size="small" color="error" onClick={() => handleDelete(building.id)}><DeleteIcon fontSize="small" /></IconButton>
+                     </Box>
+                   )}
+                 </Box>
                 <Divider sx={{ mb: 2 }} />
                 <Grid container spacing={1}>
-                  <Grid item xs={6}>
+                  <Grid size={{ xs: 6 }}>
                     <Typography variant="caption" color="textSecondary">Total Floors</Typography>
                     <Typography variant="body2" fontWeight="600">{building.totalFloors}</Typography>
                   </Grid>
-                  <Grid item xs={6}>
+                  <Grid size={{ xs: 6 }}>
                     <Typography variant="caption" color="textSecondary">Total Resources</Typography>
                     <Typography variant="body2" fontWeight="600">{building._count.resources}</Typography>
                   </Grid>
@@ -169,8 +216,8 @@ export default function BuildingsPage() {
         ))}
       </Grid>
 
-      <Dialog open={open} onClose={() => setOpen(false)} maxWidth="xs" fullWidth>
-        <DialogTitle sx={{ fontWeight: 700 }}>Add New Building</DialogTitle>
+       <Dialog open={open} onClose={() => { setOpen(false); setEditingBuilding(null); }} maxWidth="xs" fullWidth>
+        <DialogTitle sx={{ fontWeight: 700 }}>{editingBuilding ? 'Update Building' : 'Add New Building'}</DialogTitle>
         <DialogContent>
           <Box component="form" sx={{ mt: 1 }}>
             <TextField
@@ -207,7 +254,7 @@ export default function BuildingsPage() {
             onClick={handleSubmit(onSubmit)}
             disabled={isSubmitting}
           >
-            {isSubmitting ? <CircularProgress size={24} color="inherit" /> : 'Create'}
+             {isSubmitting ? <CircularProgress size={24} color="inherit" /> : (editingBuilding ? 'Update' : 'Create')}
           </Button>
         </DialogActions>
       </Dialog>

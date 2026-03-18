@@ -6,7 +6,9 @@ import { verifyToken, getAuthUser } from '@/lib/auth';
 export async function GET(request: NextRequest) {
     try {
         const payload = await getAuthUser(request);
-        if (!payload || payload.role !== 'ADMIN') { return NextResponse.json({ error: 'Unauthorized' }, { status: 401 }); }
+        if (!payload || !['ADMIN', 'EMPLOYEE'].includes(payload.role)) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 }); 
+        }
 
         const { searchParams } = new URL(request.url);
         const status = searchParams.get('status');
@@ -61,8 +63,8 @@ export async function POST(request: NextRequest) {
         });
 
         return NextResponse.json({ maintenance }, { status: 201 });
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error creating maintenance:', error);
-        return NextResponse.json({ error: 'Failed to create maintenance' }, { status: 500 });
+        return NextResponse.json({ error: error.message || 'Failed to create maintenance' }, { status: 500 });
     }
 }

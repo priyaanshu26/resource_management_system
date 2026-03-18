@@ -24,6 +24,9 @@ export async function GET(request: NextRequest) {
         // Admin-only stats
         if (payload.role === 'ADMIN') {
             stats.totalBookings = await prisma.booking.count();
+            stats.approvedBookings = await prisma.booking.count({
+                where: { status: 'APPROVED' }
+            });
             stats.pendingApprovals = await prisma.booking.count({
                 where: { status: 'PENDING' }
             });
@@ -32,6 +35,9 @@ export async function GET(request: NextRequest) {
             stats.totalResourceTypes = await prisma.resourceType.count();
             stats.activeMaintenance = await prisma.maintenance.count({
                 where: { status: { in: ['SCHEDULED', 'IN_PROGRESS'] } }
+            });
+            stats.completedMaintenance = await prisma.maintenance.count({
+                where: { status: 'COMPLETED' }
             });
 
             // Upcoming bookings (next 7 days)

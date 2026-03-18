@@ -1,15 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { hashPassword } from '@/lib/auth';
+import { getAuthUser, hashPassword } from '@/lib/auth';
 import { z } from 'zod';
 
 const registerSchema = z.object({
     name: z.string().min(2, 'Name must be at least 2 characters'),
     email: z.string().email('Invalid email address'),
     password: z.string().min(6, 'Password must be at least 6 characters'),
-    role: z.enum(['EMPLOYEE', 'STUDENT'], {
-        errorMap: () => ({ message: 'Role must be either EMPLOYEE or STUDENT' }),
-    }),
+    role: z.enum(['ADMIN', 'EMPLOYEE', 'STUDENT']),
 });
 
 export async function POST(request: NextRequest) {
@@ -20,12 +18,23 @@ export async function POST(request: NextRequest) {
         const validation = registerSchema.safeParse(body);
         if (!validation.success) {
             return NextResponse.json(
-                { error: 'Validation failed', details: validation.error.errors },
+                { error: 'Validation failed', details: validation.error.format() },
                 { status: 400 }
             );
         }
 
         const { name, email, password, role } = validation.data;
+
+        // Security check: Only admins can register other admins
+        if (role === 'ADMIN') {
+            const payload = await getAuthUser(request);
+            if (!payload || payload.role !== 'ADMIN') {
+                return NextResponse.json(
+                    { error: 'Unauthorized to register admin accounts' },
+                    { status: 403 }
+                );
+            }
+        }
 
         // Check if user already exists
         const existingUser = await prisma.user.findUnique({
@@ -48,7 +57,7 @@ export async function POST(request: NextRequest) {
                 name,
                 email,
                 password: hashedPassword,
-                role,
+                role: role as any,
             },
             select: {
                 id: true,
@@ -67,10 +76,10 @@ export async function POST(request: NextRequest) {
             },
             { status: 201 }
         );
-    } catch (error) {
+    } catch (error: any) {
         console.error('Registration error:', error);
         return NextResponse.json(
-            { error: 'Internal server error' },
+            { error: error.message || 'Internal server error' },
             { status: 500 }
         );
     }

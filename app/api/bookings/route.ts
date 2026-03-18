@@ -72,7 +72,10 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'End time must be after start time' }, { status: 400 });
         }
 
-        if (start < new Date()) {
+        // Allow booking starting from today (ignore specific time for the 'past date' check)
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        if (start < today) {
             return NextResponse.json({ error: 'Cannot book past dates' }, { status: 400 });
         }
 
