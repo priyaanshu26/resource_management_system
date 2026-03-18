@@ -16,6 +16,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { formatDateTime } from '@/lib/formatters';
+import { format } from 'date-fns';
 
 interface Booking {
   id: number;
@@ -138,7 +140,9 @@ export default function BookingsPage() {
                   <Avatar sx={{ bgcolor: 'primary.light' }}><EventNoteIcon /></Avatar>
                   <Box sx={{ flexGrow: 1 }}>
                     <Typography variant="h6">{booking.resource.resourceName}</Typography>
-                    <Typography variant="body2" color="textSecondary">{new Date(booking.startDatetime).toLocaleString()} - {new Date(booking.endDatetime).toLocaleTimeString()}</Typography>
+                    <Typography variant="body2" color="textSecondary">
+                      {formatDateTime(booking.startDatetime)} - {format(new Date(booking.endDatetime), 'HH:mm')}
+                    </Typography>
                     <Typography variant="caption" sx={{ display: 'block', mt: 0.5, fontStyle: 'italic' }}>
                       Created by: {booking.user.name} ({booking.user.email})
                     </Typography>

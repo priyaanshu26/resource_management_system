@@ -31,6 +31,7 @@ import PeopleIcon from '@mui/icons-material/People';
 import HistoryIcon from '@mui/icons-material/History';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import AssessmentIcon from '@mui/icons-material/Assessment';
+import { formatDateTime } from '@/lib/formatters';
 import { useRouter } from 'next/navigation';
 import { 
   BarChart, 
@@ -196,10 +197,10 @@ export default function DashboardOverview() {
                       <BookingsIcon fontSize="small" />
                     </Avatar>
                   </ListItemAvatar>
-                  <ListItemText 
+                   <ListItemText 
                     primary={booking.resource.resourceName}
                     primaryTypographyProps={{ fontWeight: 600, variant: 'body2' }}
-                    secondary={`${new Date(booking.startDatetime).toLocaleDateString()} at ${new Date(booking.startDatetime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • ${isAdmin ? booking.user.name : booking.status}`}
+                    secondary={`${formatDateTime(booking.startDatetime)} • ${isAdmin ? booking.user.name : booking.status}`}
                     secondaryTypographyProps={{ variant: 'caption' }}
                   />
                 </ListItem>
@@ -214,66 +215,6 @@ export default function DashboardOverview() {
         </Grid>
 
         {/* Administration Table - Bottom Section */}
-        {isAdmin && (
-          <Grid size={{ xs: 12 }}>
-            <Box sx={{ mt: 1 }}>
-              <Typography variant="h6" fontWeight="700" sx={{ mb: 2 }}>Resource Health & Utilization</Typography>
-              <TableContainer component={Paper} sx={{ borderRadius: 4, border: '1px solid #f0f0f0', overflow: 'hidden' }}>
-                <Table>
-                  <TableHead sx={{ bgcolor: '#fafafa' }}>
-                    <TableRow>
-                      <TableCell sx={{ fontWeight: 700, py: 2 }}>Metric Type</TableCell>
-                      <TableCell align="center" sx={{ fontWeight: 700 }}>Performance</TableCell>
-                      <TableCell align="center" sx={{ fontWeight: 700 }}>Indicators</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {[
-                      { 
-                        label: 'Booking Fulfillment Rate', 
-                        value: stats?.totalBookings ? `${Math.round(((stats.approvedBookings || 0) / stats.totalBookings) * 100)}%` : '0%', 
-                        status: stats?.totalBookings && (stats.approvedBookings || 0) / stats.totalBookings > 0.8 ? 'Excellent' : 'Stable',
-                        color: 'info' 
-                      },
-                      { 
-                        label: 'Service Continuity Index', 
-                        value: '99.9%', 
-                        status: (stats?.activeMaintenance || 0) > 0 ? 'Repairs in Progress' : 'Operational', 
-                        color: (stats?.activeMaintenance || 0) > 0 ? 'warning' : 'success' 
-                      },
-                      { 
-                        label: 'Active Service Requests', 
-                        value: stats?.pendingApprovals || 0, 
-                        status: (stats?.pendingApprovals || 0) > 5 ? 'High Volume' : 'Under Control', 
-                        color: (stats?.pendingApprovals || 0) > 5 ? 'error' : 'warning' 
-                      },
-                      { 
-                        label: 'Global Resource Footprint', 
-                        value: stats?.totalResources || 0, 
-                        status: 'Active', 
-                        color: 'primary' 
-                      },
-                    ].map((row, i) => (
-                      <TableRow key={i} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                        <TableCell sx={{ fontWeight: 600, py: 2 }}>{row.label}</TableCell>
-                        <TableCell align="center" sx={{ fontWeight: 800, fontSize: '1.1rem' }}>{row.value}</TableCell>
-                        <TableCell align="center">
-                          <Chip 
-                            label={row.status} 
-                            color={row.color as any} 
-                            size="small" 
-                            variant="filled" 
-                            sx={{ fontWeight: 700, borderRadius: 1.5, fontSize: '0.65rem', textTransform: 'uppercase' }} 
-                          />
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </Box>
-          </Grid>
-        )}
       </Grid>
     </Container>
   );

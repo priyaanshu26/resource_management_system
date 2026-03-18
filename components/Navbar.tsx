@@ -11,9 +11,12 @@ export default function Navbar() {
   return (
     <AppBar position="sticky" elevation={0} sx={{ borderBottom: '1px solid #e0e0e0', backgroundColor: '#ffffff', color: '#333' }}>
       <Toolbar>
-        <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontWeight: 700, color: 'primary.main' }}>
-          RMS Dashboard
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexGrow: 1 }}>
+          <Box component="img" src="/logo.png" sx={{ width: 32, height: 32, borderRadius: 0.5 }} alt="Logo" />
+          <Typography variant="h6" component="div" sx={{ fontWeight: 800, color: 'primary.main', letterSpacing: 0.5 }}>
+            RESOURCE MANAGEMENT SYSTEM
+          </Typography>
+        </Box>
         
         {user && (
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>

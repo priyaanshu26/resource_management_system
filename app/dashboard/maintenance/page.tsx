@@ -34,6 +34,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { formatDate } from '@/lib/formatters';
 
 interface Maintenance {
   id: number;
@@ -266,7 +267,7 @@ export default function MaintenancePage() {
                 
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                    <Chip size="small" label={m.status} color={getStatusColor(m.status)} sx={{ height: 20, fontSize: '0.65rem', fontWeight: 700 }} />
-                   <Typography variant="caption" color="textSecondary">{new Date(m.scheduledDate).toLocaleDateString()}</Typography>
+                   <Typography variant="caption" color="textSecondary">{formatDate(m.scheduledDate)}</Typography>
                 </Box>
 
                 {m.notes && (

@@ -34,6 +34,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { formatDate } from '@/lib/formatters';
 
 interface User {
   id: number;
@@ -234,7 +235,7 @@ export default function UsersPage() {
                   />
                 </TableCell>
                 <TableCell>#{user.id}</TableCell>
-                <TableCell>{new Date(user.createdAt).toLocaleDateString()}</TableCell>
+                <TableCell>{formatDate(user.createdAt)}</TableCell>
                  <TableCell align="right">
                     <Tooltip title="Edit User">
                       <IconButton size="small" onClick={() => handleEditOpen(user)}><EditIcon fontSize="small" /></IconButton>

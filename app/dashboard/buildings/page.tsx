@@ -1,15 +1,15 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { 
-  Box, 
-  Container, 
-  Typography, 
-  Grid, 
-  Card, 
-  CardContent, 
-  Divider, 
-  CircularProgress, 
+import {
+  Box,
+  Container,
+  Typography,
+  Grid,
+  Card,
+  CardContent,
+  Divider,
+  CircularProgress,
   Alert,
   Avatar,
   Paper,
@@ -127,8 +127,8 @@ export default function BuildingsPage() {
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-           ...data,
-           totalFloors: parseInt(data.totalFloors)
+          ...data,
+          totalFloors: parseInt(data.totalFloors)
         }),
       });
       const result = await response.json();
@@ -159,8 +159,8 @@ export default function BuildingsPage() {
           <Typography variant="body1" color="textSecondary">Manage organizational buildings and floor plans.</Typography>
         </Box>
         {isAdmin && (
-          <Button 
-            variant="contained" 
+          <Button
+            variant="contained"
             startIcon={<AddIcon />}
             onClick={() => setOpen(true)}
             sx={{ borderRadius: 2 }}
@@ -181,21 +181,21 @@ export default function BuildingsPage() {
                   <Avatar sx={{ bgcolor: 'primary.main', borderRadius: 2 }}>
                     <BuildingIcon />
                   </Avatar>
-                   <Box>
+                  <Box>
                     <Typography variant="h6" fontWeight="600">
                       {building.buildingName}
                     </Typography>
                     <Typography variant="caption" color="textSecondary">
                       Bldg #{building.buildingNumber}
                     </Typography>
-                   </Box>
-                   {isAdmin && (
-                     <Box sx={{ ml: 'auto', display: 'flex', gap: 0.5 }}>
-                        <IconButton size="small" onClick={() => handleEditOpen(building)}><EditIcon fontSize="small" /></IconButton>
-                        <IconButton size="small" color="error" onClick={() => handleDelete(building.id)}><DeleteIcon fontSize="small" /></IconButton>
-                     </Box>
-                   )}
-                 </Box>
+                  </Box>
+                  {isAdmin && (
+                    <Box sx={{ ml: 'auto', display: 'flex', gap: 0.5 }}>
+                      <IconButton size="small" onClick={() => handleEditOpen(building)}><EditIcon fontSize="small" /></IconButton>
+                      <IconButton size="small" color="error" onClick={() => handleDelete(building.id)}><DeleteIcon fontSize="small" /></IconButton>
+                    </Box>
+                  )}
+                </Box>
                 <Divider sx={{ mb: 2 }} />
                 <Grid container spacing={1}>
                   <Grid size={{ xs: 6 }}>
@@ -208,15 +208,12 @@ export default function BuildingsPage() {
                   </Grid>
                 </Grid>
               </CardContent>
-              <Box sx={{ px: 2, py: 1, textAlign: 'center' }}>
-                 <Button fullWidth variant="text" size="small">View Details</Button>
-              </Box>
             </Card>
           </Grid>
         ))}
       </Grid>
 
-       <Dialog open={open} onClose={() => { setOpen(false); setEditingBuilding(null); }} maxWidth="xs" fullWidth>
+      <Dialog open={open} onClose={() => { setOpen(false); setEditingBuilding(null); }} maxWidth="xs" fullWidth>
         <DialogTitle sx={{ fontWeight: 700 }}>{editingBuilding ? 'Update Building' : 'Add New Building'}</DialogTitle>
         <DialogContent>
           <Box component="form" sx={{ mt: 1 }}>
@@ -249,12 +246,12 @@ export default function BuildingsPage() {
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
           <Button onClick={() => setOpen(false)}>Cancel</Button>
-          <Button 
-            variant="contained" 
+          <Button
+            variant="contained"
             onClick={handleSubmit(onSubmit)}
             disabled={isSubmitting}
           >
-             {isSubmitting ? <CircularProgress size={24} color="inherit" /> : (editingBuilding ? 'Update' : 'Create')}
+            {isSubmitting ? <CircularProgress size={24} color="inherit" /> : (editingBuilding ? 'Update' : 'Create')}
           </Button>
         </DialogActions>
       </Dialog>

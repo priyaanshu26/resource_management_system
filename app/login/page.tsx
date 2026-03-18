@@ -61,86 +61,109 @@ export default function LoginPage() {
   };
 
   return (
-    <Container component="main" maxWidth="xs">
-      <Box
-        sx={{
-          marginTop: 8,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}
-      >
-        <Paper 
-          elevation={0}
-          sx={{ 
-            p: 4, 
-            width: '100%', 
-            borderRadius: 3, 
-            border: '1px solid #e0e0e0',
-            backgroundColor: '#ffffff'
+    <Box 
+      sx={{ 
+        minHeight: '100vh', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        bgcolor: '#f8f9fa',
+        background: 'radial-gradient(circle at 50% 50%, #ffffff 0%, #f0f4f8 100%)'
+      }}
+    >
+      <Container component="main" maxWidth="xs">
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
           }}
         >
-          <Typography component="h1" variant="h5" align="center" gutterBottom fontWeight="600" color="primary">
-            Resource Management
-          </Typography>
-          <Typography component="h2" variant="body1" align="center" color="textSecondary" sx={{ mb: 3 }}>
-            Sign in to your account
-          </Typography>
+          <Paper 
+            elevation={0}
+            sx={{ 
+              p: 5, 
+              width: '100%', 
+              borderRadius: 4, 
+              border: '1px solid #f0f0f0',
+              backgroundColor: '#ffffff',
+              boxShadow: '0 20px 40px rgba(0,0,0,0.06)'
+            }}
+          >
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 4 }}>
+              <Box 
+                component="img" 
+                src="/logo.png" 
+                sx={{ width: 64, height: 64, mb: 2, borderRadius: 2 }} 
+                alt="RMS Logo" 
+              />
+              <Typography variant="h5" align="center" fontWeight="800" color="primary" sx={{ letterSpacing: 1, textTransform: 'uppercase' }}>
+                RMS PORTAL
+              </Typography>
+              <Typography variant="body2" align="center" color="textSecondary" sx={{ mt: 1, fontWeight: 500 }}>
+                Resource Management System
+              </Typography>
+            </Box>
 
-          {error && (
-            <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
-              {error}
-            </Alert>
-          )}
+            <Typography component="h2" variant="h6" align="center" sx={{ mb: 4, fontWeight: 700 }}>
+              Sign in to your account
+            </Typography>
 
-          <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="email"
-              label="Email Address"
-              autoComplete="email"
-              autoFocus
-              {...register('email')}
-              error={!!errors.email}
-              helperText={errors.email?.message}
-              size='medium'
-              variant='outlined'
-            />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              label="Password"
-              type="password"
-              id="password"
-              autoComplete="current-password"
-              {...register('password')}
-              error={!!errors.password}
-              helperText={errors.password?.message}
-              size='medium'
-              variant='outlined'
-            />
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              disabled={isLoading}
-              sx={{ 
-                mt: 3, 
-                mb: 2, 
-                py: 1.5,
-                fontWeight: 600,
-                fontSize: '1rem',
-                borderRadius: 2
-              }}
-            >
-              {isLoading ? <CircularProgress size={24} color="inherit" /> : 'Log In'}
-            </Button>
-          </Box>
-        </Paper>
-      </Box>
-    </Container>
+            {error && (
+              <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
+                {error}
+              </Alert>
+            )}
+
+            <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                id="email"
+                label="Email Address"
+                autoComplete="email"
+                autoFocus
+                {...register('email')}
+                error={!!errors.email}
+                helperText={errors.email?.message}
+                size='medium'
+                variant='outlined'
+              />
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                label="Password"
+                type="password"
+                id="password"
+                autoComplete="current-password"
+                {...register('password')}
+                error={!!errors.password}
+                helperText={errors.password?.message}
+                size='medium'
+                variant='outlined'
+              />
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                disabled={isLoading}
+                sx={{ 
+                  mt: 3, 
+                  mb: 2, 
+                  py: 1.5,
+                  fontWeight: 600,
+                  fontSize: '1rem',
+                  borderRadius: 2
+                }}
+              >
+                {isLoading ? <CircularProgress size={24} color="inherit" /> : 'Log In'}
+              </Button>
+            </Box>
+          </Paper>
+        </Box>
+      </Container>
+    </Box>
   );
 }

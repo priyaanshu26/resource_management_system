@@ -56,9 +56,9 @@ export default function Sidebar() {
         },
       }}
     >
-      <Box sx={{ p: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
-        <Box sx={{ width: 32, height: 32, bgcolor: 'primary.main', borderRadius: 1 }} />
-        <Typography variant="h6" fontWeight="700" color="primary">
+      <Box sx={{ p: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Box component="img" src="/logo.png" sx={{ width: 40, height: 40, borderRadius: 1 }} alt="RMS Logo" />
+        <Typography variant="h6" fontWeight="800" color="primary" sx={{ letterSpacing: 1 }}>
           RMS
         </Typography>
       </Box>
