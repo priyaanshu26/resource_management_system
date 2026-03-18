@@ -13,11 +13,11 @@ async function main() {
     );
 
     const admin = await prisma.user.upsert({
-        where: { email: process.env.DEFAULT_ADMIN_EMAIL || 'admin@rms.com' },
+        where: { email: process.env.DEFAULT_ADMIN_EMAIL || 'admin@infranexis.com' },
         update: {},
         create: {
             name: 'System Administrator',
-            email: process.env.DEFAULT_ADMIN_EMAIL || 'admin@rms.com',
+            email: process.env.DEFAULT_ADMIN_EMAIL || 'admin@infranexis.com',
             password: hashedPassword,
             role: 'ADMIN',
         },
@@ -27,22 +27,22 @@ async function main() {
 
     // Create sample users
     const employee = await prisma.user.upsert({
-        where: { email: 'employee@rms.com' },
+        where: { email: 'employee@infranexis.com' },
         update: {},
         create: {
             name: 'John Doe',
-            email: 'employee@rms.com',
+            email: 'employee@infranexis.com',
             password: await bcrypt.hash('Employee@123', 10),
             role: 'EMPLOYEE',
         },
     });
 
     const student = await prisma.user.upsert({
-        where: { email: 'student@rms.com' },
+        where: { email: 'student@infranexis.com' },
         update: {},
         create: {
             name: 'Jane Smith',
-            email: 'student@rms.com',
+            email: 'student@infranexis.com',
             password: await bcrypt.hash('Student@123', 10),
             role: 'STUDENT',
         },

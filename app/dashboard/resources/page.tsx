@@ -188,9 +188,9 @@ export default function ResourcesPage() {
 
   return (
     <Container maxWidth="lg" sx={{ mt: 2 }}>
-      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <Box sx={{ mb: 3, display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, gap: 2 }}>
         <Box>
-            <Typography variant="h4" component="h1" gutterBottom fontWeight="700">Resources Overview</Typography>
+            <Typography variant="h4" component="h1" gutterBottom fontWeight="700" sx={{ fontSize: { xs: '1.75rem', sm: '2.125rem' } }}>Resources Overview</Typography>
             <Typography variant="body1" color="textSecondary">Manage organizational assets and rooms.</Typography>
         </Box>
         {isAdmin && (
@@ -198,7 +198,7 @@ export default function ResourcesPage() {
             variant="contained" 
             startIcon={<AddIcon />}
             onClick={() => setOpen(true)}
-            sx={{ borderRadius: 2 }}
+            sx={{ borderRadius: 2, whiteSpace: 'nowrap' }}
           >
             Add Resource
           </Button>

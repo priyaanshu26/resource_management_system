@@ -107,12 +107,12 @@ export default function DashboardOverview() {
 
   return (
     <Container maxWidth="lg" sx={{ mt: 2, pb: 4 }}>
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" fontWeight="700" sx={{ mb: 0.5 }}>
+      <Box sx={{ mb: 4, textAlign: { xs: 'center', sm: 'left' } }}>
+        <Typography variant="h4" fontWeight="700" sx={{ mb: 0.5, fontSize: { xs: '1.75rem', sm: '2.125rem' } }}>
           Dashboard Overview
         </Typography>
-        <Typography variant="body1" color="textSecondary">
-          Welcome back, {user?.name}. Here's a snapshot of the Resource Management System.
+        <Typography variant="body1" color="textSecondary" sx={{ fontSize: { xs: '0.9rem', sm: '1rem' } }}>
+          Welcome back, {user?.name}. Here's a snapshot of the InfraNexis platform.
         </Typography>
       </Box>
 

@@ -127,36 +127,54 @@ export default function BookingsPage() {
 
   return (
     <Container maxWidth="lg" sx={{ mt: 2 }}>
-      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between' }}>
-        <Typography variant="h4" fontWeight="700">Bookings</Typography>
-        <Button variant="contained" onClick={handleOpenNew}>New Booking</Button>
+      <Box sx={{ mb: 3, display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, gap: 2 }}>
+        <Typography variant="h4" fontWeight="700" sx={{ fontSize: { xs: '1.75rem', sm: '2.125rem' } }}>Bookings</Typography>
+        <Button variant="contained" onClick={handleOpenNew} sx={{ borderRadius: 2 }}>New Booking</Button>
       </Box>
-      <Grid container spacing={3}>
+      <Grid container spacing={2}>
         {bookings.map((booking) => (
           <Grid key={booking.id} size={{ xs: 12 }}>
-            <Card sx={{ borderRadius: 3 }}>
+            <Card sx={{ borderRadius: 3, border: '1px solid #f0f0f0' }}>
               <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <Avatar sx={{ bgcolor: 'primary.light' }}><EventNoteIcon /></Avatar>
+                <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'flex-start', sm: 'center' }, gap: 2 }}>
+                  <Avatar sx={{ bgcolor: 'primary.light', width: 48, height: 48 }}><EventNoteIcon /></Avatar>
                   <Box sx={{ flexGrow: 1 }}>
-                    <Typography variant="h6">{booking.resource.resourceName}</Typography>
-                    <Typography variant="body2" color="textSecondary">
-                      {formatDateTime(booking.startDatetime)} - {format(new Date(booking.endDatetime), 'HH:mm')}
-                    </Typography>
-                    <Typography variant="caption" sx={{ display: 'block', mt: 0.5, fontStyle: 'italic' }}>
-                      Created by: {booking.user.name} ({booking.user.email})
+                    <Typography variant="h6" fontWeight="700">{booking.resource.resourceName}</Typography>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, alignItems: 'center', mb: 0.5 }}>
+                      <Typography variant="body2" color="textSecondary" fontWeight="500">
+                        {formatDateTime(booking.startDatetime)} - {format(new Date(booking.endDatetime), 'HH:mm')}
+                      </Typography>
+                      <Chip 
+                        label={booking.status} 
+                        size="small"
+                        color={booking.status === 'APPROVED' ? 'success' : booking.status === 'REJECTED' || booking.status === 'CANCELLED' ? 'error' : 'warning'} 
+                        sx={{ fontWeight: 600, fontSize: '0.7rem' }}
+                      />
+                    </Box>
+                    <Typography variant="caption" sx={{ display: 'block', color: 'text.secondary' }}>
+                      Created by: <strong>{booking.user.name}</strong> ({booking.user.email})
                     </Typography>
                   </Box>
-                  <Chip label={booking.status} color={booking.status === 'APPROVED' ? 'success' : 'warning'} />
-                  {isAdmin && booking.status === 'PENDING' && (
-                    <Box sx={{ display: 'flex', gap: 1 }}>
-                      <Button size="small" variant="contained" color="success" onClick={() => handleStatusUpdate(booking.id, 'APPROVED')}>Approve</Button>
-                      <Button size="small" variant="outlined" color="error" onClick={() => handleStatusUpdate(booking.id, 'REJECTED')}>Reject</Button>
-                    </Box>
-                  )}
-                  {isAdmin && (
-                    <IconButton color="error" onClick={() => handleDelete(booking.id)}><DeleteIcon /></IconButton>
-                  )}
+                  
+                  <Box sx={{ 
+                    display: 'flex', 
+                    gap: 1, 
+                    width: { xs: '100%', sm: 'auto' }, 
+                    justifyContent: { xs: 'flex-end', sm: 'flex-start' },
+                    mt: { xs: 2, sm: 0 },
+                    pt: { xs: 1, sm: 0 },
+                    borderTop: { xs: '1px solid #f0f0f0', sm: 'none' }
+                  }}>
+                    {isAdmin && booking.status === 'PENDING' && (
+                      <>
+                        <Button size="small" variant="contained" color="success" onClick={() => handleStatusUpdate(booking.id, 'APPROVED')} sx={{ borderRadius: 1.5 }}>Approve</Button>
+                        <Button size="small" variant="outlined" color="error" onClick={() => handleStatusUpdate(booking.id, 'REJECTED')} sx={{ borderRadius: 1.5 }}>Reject</Button>
+                      </>
+                    )}
+                    {isAdmin && (
+                      <IconButton color="error" size="small" onClick={() => handleDelete(booking.id)} sx={{ ml: { sm: 1 } }}><DeleteIcon /></IconButton>
+                    )}
+                  </Box>
                 </Box>
               </CardContent>
             </Card>

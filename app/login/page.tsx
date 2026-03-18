@@ -98,10 +98,10 @@ export default function LoginPage() {
                 alt="RMS Logo" 
               />
               <Typography variant="h5" align="center" fontWeight="800" color="primary" sx={{ letterSpacing: 1, textTransform: 'uppercase' }}>
-                RMS PORTAL
+                InfraNexis Portal
               </Typography>
               <Typography variant="body2" align="center" color="textSecondary" sx={{ mt: 1, fontWeight: 500 }}>
-                Resource Management System
+                Advanced Infrastructure Management
               </Typography>
             </Box>
 

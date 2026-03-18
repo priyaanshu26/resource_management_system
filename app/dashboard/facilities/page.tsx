@@ -173,9 +173,9 @@ export default function FacilitiesPage() {
 
   return (
     <Container maxWidth="lg" sx={{ mt: 2 }}>
-      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <Box sx={{ mb: 3, display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, gap: 2 }}>
         <Box>
-           <Typography variant="h4" fontWeight="700">Facilities & Amenities</Typography>
+           <Typography variant="h4" fontWeight="700" sx={{ fontSize: { xs: '1.75rem', sm: '2.125rem' } }}>Facilities & Amenities</Typography>
            <Typography variant="body1" color="textSecondary">Manage organizational assets and resources attachments.</Typography>
         </Box>
         {isAdmin && (
@@ -183,7 +183,7 @@ export default function FacilitiesPage() {
             variant="contained" 
             startIcon={<AddIcon />}
             onClick={() => { setEditingFacility(null); reset(); setOpen(true); }}
-            sx={{ borderRadius: 2 }}
+            sx={{ borderRadius: 2, whiteSpace: 'nowrap' }}
           >
             Add Facility
           </Button>

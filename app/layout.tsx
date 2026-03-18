@@ -3,8 +3,8 @@ import ClientLayout from './ClientLayout';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Resource Management System',
-  description: 'Manage buildings, resources, and bookings efficiently.',
+  title: 'InfraNexis',
+  description: 'Advanced Infrastructure & Resource Management Platform',
 };
 
 export default function RootLayout({

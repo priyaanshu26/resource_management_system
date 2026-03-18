@@ -1,6 +1,6 @@
-# Resource Management System (RMS)
+# InfraNexis
 
-A modern, professional enterprise-grade Resource Management System built for **Darshan University**. This system streamlines the management of organizational assets, facility bookings, and maintenance tracking through a secure, roles-based portal.
+A modern, professional enterprise-grade Infrastructure & Resource Management Platform built for **Darshan University**. This system streamlines the management of organizational assets, facility bookings, and maintenance tracking through a secure, roles-based portal.
 
 ---
 
@@ -63,9 +63,9 @@ Portal: [http://localhost:3000](http://localhost:3000)
 ## 👥 Default Accounts (Seeded)
 | Role | Email | Password |
 | :--- | :--- | :--- |
-| **Admin** | `admin@rms.com` | `Admin@123` |
-| **Employee** | `employee@rms.com` | `Employee@123` |
-| **Student** | `student@rms.com` | `Student@123` |
+| **Admin** | `admin@infranexis.com` | `Admin@123` |
+| **Employee** | `employee@infranexis.com` | `Employee@123` |
+| **Student** | `student@infranexis.com` | `Student@123` |
 
 ---
 

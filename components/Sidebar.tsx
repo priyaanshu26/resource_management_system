@@ -10,7 +10,9 @@ import {
   ListItemText, 
   Box, 
   Typography, 
-  Divider 
+  Divider,
+  useMediaQuery,
+  useTheme
 } from '@mui/material';
 import { useAuth } from '@/lib/AuthContext';
 import { usePathname, useRouter } from 'next/navigation';
@@ -20,15 +22,21 @@ import BuildingsIcon from '@mui/icons-material/Business';
 import ResourceIcon from '@mui/icons-material/Inventory';
 import MaintenanceIcon from '@mui/icons-material/Build';
 import UserIcon from '@mui/icons-material/People';
-import ReportsIcon from '@mui/icons-material/Assessment';
 import FacilityIcon from '@mui/icons-material/HomeRepairService';
 
 const drawerWidth = 240;
 
-export default function Sidebar() {
+interface SidebarProps {
+  mobileOpen: boolean;
+  onClose: () => void;
+}
+
+export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { user } = useAuth();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const role = user?.role || 'STUDENT';
 
@@ -42,24 +50,12 @@ export default function Sidebar() {
     ...(role === 'ADMIN' ? [{ text: 'Users', icon: <UserIcon />, path: '/dashboard/users' }] : []),
   ];
 
-  return (
-    <Drawer
-      variant="permanent"
-      sx={{
-        width: drawerWidth,
-        flexShrink: 0,
-        [`& .MuiDrawer-paper`]: { 
-          width: drawerWidth, 
-          boxSizing: 'border-box',
-          borderRight: '1px solid #e0e0e0',
-          backgroundColor: '#ffffff'
-        },
-      }}
-    >
+  const drawerContent = (
+    <>
       <Box sx={{ p: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
-        <Box component="img" src="/logo.png" sx={{ width: 40, height: 40, borderRadius: 1 }} alt="RMS Logo" />
+        <Box component="img" src="/logo.png" sx={{ width: 40, height: 40, borderRadius: 1 }} alt="InfraNexis Logo" />
         <Typography variant="h6" fontWeight="800" color="primary" sx={{ letterSpacing: 1 }}>
-          RMS
+          InfraNexis
         </Typography>
       </Box>
       <Divider />
@@ -68,7 +64,10 @@ export default function Sidebar() {
           {menuItems.map((item) => (
             <ListItem key={item.text} disablePadding>
               <ListItemButton 
-                onClick={() => router.push(item.path)}
+                onClick={() => {
+                   router.push(item.path);
+                   if (isMobile) onClose();
+                }}
                 selected={pathname === item.path}
                 sx={{
                   mx: 1,
@@ -94,6 +93,45 @@ export default function Sidebar() {
           ))}
         </List>
       </Box>
-    </Drawer>
+    </>
+  );
+
+  return (
+    <>
+      {/* Desktop Permanent Drawer */}
+      <Drawer
+        variant="permanent"
+        sx={{
+          display: { xs: 'none', md: 'block' },
+          width: drawerWidth,
+          flexShrink: 0,
+          [`& .MuiDrawer-paper`]: { 
+            width: drawerWidth, 
+            boxSizing: 'border-box',
+            borderRight: '1px solid #e0e0e0',
+            backgroundColor: '#ffffff'
+          },
+        }}
+      >
+        {drawerContent}
+      </Drawer>
+
+      {/* Mobile Temporary Drawer */}
+      <Drawer
+        variant="temporary"
+        open={mobileOpen}
+        onClose={onClose}
+        ModalProps={{
+          keepMounted: true, // Better open performance on mobile.
+        }}
+        sx={{
+          display: { xs: 'block', md: 'none' },
+          '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+        }}
+      >
+        {drawerContent}
+      </Drawer>
+    </>
   );
 }
+

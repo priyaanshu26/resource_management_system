@@ -153,9 +153,9 @@ export default function BuildingsPage() {
 
   return (
     <Container maxWidth="lg" sx={{ mt: 2 }}>
-      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <Box sx={{ mb: 3, display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, gap: 2 }}>
         <Box>
-          <Typography variant="h4" fontWeight="700">Buildings</Typography>
+          <Typography variant="h4" fontWeight="700" sx={{ fontSize: { xs: '1.75rem', sm: '2.125rem' } }}>Buildings</Typography>
           <Typography variant="body1" color="textSecondary">Manage organizational buildings and floor plans.</Typography>
         </Box>
         {isAdmin && (
@@ -163,7 +163,7 @@ export default function BuildingsPage() {
             variant="contained"
             startIcon={<AddIcon />}
             onClick={() => setOpen(true)}
-            sx={{ borderRadius: 2 }}
+            sx={{ borderRadius: 2, whiteSpace: 'nowrap' }}
           >
             Add Building
           </Button>
